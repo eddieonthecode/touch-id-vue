@@ -9,6 +9,7 @@
         'flex-column': GetSide == 'right' || GetSide == 'left',
         'align-items-start': GetSide == 'top' || GetSide == 'left',
         'align-items-end': GetSide == 'bottom' || GetSide == 'right',
+        'show-live-chat': isShowLiveChat,
       },
       GetSide,
     ]"
@@ -115,7 +116,9 @@ export default {
     document.addEventListener('mouseup', (e) => {
       if (this.isMoving) {
         this.isMoving = false;
-        this.onStopMove();
+        if (this.modeCollapse != 'click' && this.modeFunction != 'click') {
+          this.onStopMove();
+        }
       }
     });
 
@@ -138,13 +141,13 @@ export default {
           window.LiveChatWidget.on(eventName, (payload) => {
             console.log(eventName);
             if (eventName == 'ready') {
-              document.querySelector('#chat-widget-container').style.display =
-                'block';
               // window.LiveChatWidget.call('hide');
             }
             if (payload.visibility == 'minimized') {
               setTimeout(() => {
                 window.LiveChatWidget.call('hide');
+                this.isShowLiveChat = false;
+                this.setPosition();
               }, 200);
             }
           });
@@ -248,22 +251,33 @@ export default {
       console.log(this.modeFunction);
       if (this.modeFunction == 'click') {
         this.isPin = true;
-        if (window.LiveChatWidget) {
-          if (window.LiveChatWidget.get('state').visibility == 'hidden') {
-            window.LiveChatWidget.call('maximize');
-          } else {
-            window.LiveChatWidget.call('hide');
-          }
-        } else {
-          window.LiveChatWidget.call('maximize');
-        }
         if (this.isShowLiveChat) {
           window.LiveChatWidget.call('hide');
           this.isShowLiveChat = false;
         } else {
           window.LiveChatWidget.call('maximize');
+          document.querySelector('#chat-widget-container').style.display =
+            'block';
+          this.$refs.dragable.style.top = '-200px';
+          this.$refs.dragable.style.left = '-200px';
           this.isShowLiveChat = true;
         }
+        // if (window.LiveChatWidget) {
+        //   if (window.LiveChatWidget.get('state').visibility == 'hidden') {
+        //     window.LiveChatWidget.call('maximize');
+        //   } else {
+        //     window.LiveChatWidget.call('hide');
+        //   }
+        // } else {
+        //   window.LiveChatWidget.call('maximize');
+        // }
+        // if (this.isShowLiveChat) {
+        //   window.LiveChatWidget.call('hide');
+        //   this.isShowLiveChat = false;
+        // } else {
+        //   window.LiveChatWidget.call('maximize');
+        //   this.isShowLiveChat = true;
+        // }
       }
     },
 
@@ -371,6 +385,8 @@ $color: #2566e9;
 
 .touch-id {
   position: fixed;
+  top: -200px;
+  left: -200px;
   z-index: 2147483640;
   &:active {
     cursor: all-scroll;
